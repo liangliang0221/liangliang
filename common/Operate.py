@@ -1,275 +1,167 @@
-# -*-coding: utf-8 -*-
-# @Time    : 2026/05/13
-# @Author  : liangliang
-# @File    : Operate.py
-# @Software: PyCharm
-
-'''
-读取yaml信息并执行
-element_info：定位元素信息：八大元素数据+组合定位
-find_type：定位元素属性：id、xpath、name（常规匹配文本）、ids（id、classname的序列）
-operate_type: 定位元素行为操作：click、back（返回）、swipe_up（上滑） 、swipe_down（下滑）、sleep(睡眠)、check（校验）等
-以上三个为必填项
-
-send_content：send_keys 时用到，用于输入内容
-index：ids、classname时用到，用于输入第几序列
-times:back、swipe_up等时用到，用于输入次数
-'''
-
-from .GetYaml import getyaml
-from .BaseOperate import Baseoperate
-from .logs import log
-# from appium.webdriver.common.touch_action import TouchAction
+# -*- coding: utf-8 -*-
 from selenium.webdriver import ActionChains
 
+from .BaseOperate import Baseoperate
+from .GetYaml import getyaml
+from .logs import log
+
+
+logger = log()
+
+
 class Operate:
-    """
-    用于读取 yaml 数据驱动用例并执行对应的 Appium 操作。
+    """执行 YAML 文件描述的 Appium 操作步骤。"""
 
-    该类会遍历 yaml 中 `testcase` 列表，根据 `operate_type` 决定执行点击、输入、滑动、校验等动作，
-    再依据 `find_type` 选择不同定位方式（id/xpath/name/组合定位等）。
-    """
-    def __init__(self,path,driver):
-        """
-        初始化执行器。
-
-        Args:
-            path: yaml 用例文件路径（相对 `common/` 或按项目约定传入）
-            driver: Appium WebDriver 实例
-        """
+    def __init__(self, path, driver):
         self.path = path
         self.driver = driver
         self.yaml = getyaml(self.path)
-        self.baseoperate=Baseoperate(driver)
+        self.baseoperate = Baseoperate(driver)
 
     def _resolve_element(self, i):
-        """
-        根据 yaml 的 `find_type` / `element_info` /（必要时的）`index` 解析出目标元素。
+        return self._resolve_by(self.yaml.get_findtype(i), self.yaml.get_elementinfo(i), self.yaml.get_index(i))
 
-        Args:
-            i: testcase 下标
+    def _resolve_by(self, find_type, element_info, index=None):
+        if not find_type:
+            raise ValueError("当前操作需要 find_type，但 YAML 中未填写")
 
-        Returns:
-            WebElement: 一个可直接用于 click/send_keys/clear/TouchAction 的元素
-        """
-        info = self.yaml.get_elementinfo(i)
-        find_type = self.yaml.get_findtype(i)
-
-        if find_type == 'name':
-            return self.baseoperate.get_xpath_name(info)
-        elif find_type == 'contains_name':
-            return self.baseoperate.get_xpath_contains(info)
-        elif find_type == 'id':
-            return self.baseoperate.get_id(info)
-        elif find_type == 'xpath':
-            return self.baseoperate.get_xpath(info)
-        elif find_type == 'android_uiautomator':
-            return self.baseoperate.get_android_uiautomator(info)
-        elif find_type == 'ids':
-            return self.baseoperate.get_ids(info)[self.yaml.get_index(i)]
-        elif find_type == 'class_name':
-            return self.baseoperate.get_className(info)[self.yaml.get_index(i)]
-
-        raise ValueError("未知 find_type: %s" % find_type)
-
-    def _resolve_scroll_element(self, find_type, element_info, index):
-        """
-        element_swipe 场景的元素解析器（同时支持起点/终点）。
-
-        Args:
-            find_type: yaml 的 find_type（name/contains_name/id/xpath/android_uiautomator/ids/class_name）
-            element_info: yaml 对应的 element_info 或 end_element_info
-            index: ids/class_name 的序号（从 yaml 的 index 字段获取）
-
-        Returns:
-            WebElement 或者在 index 缺失时返回元素列表（尽量保持兼容）
-        """
-        if find_type == 'name':
+        if find_type == "name":
             return self.baseoperate.get_xpath_name(element_info)
-        elif find_type == 'contains_name':
+        if find_type == "contains_name":
             return self.baseoperate.get_xpath_contains(element_info)
-        elif find_type == 'id':
+        if find_type == "id":
             return self.baseoperate.get_id(element_info)
-        elif find_type == 'xpath':
+        if find_type == "xpath":
             return self.baseoperate.get_xpath(element_info)
-        elif find_type == 'android_uiautomator':
+        if find_type == "android_uiautomator":
             return self.baseoperate.get_android_uiautomator(element_info)
-        elif find_type == 'ids':
+        if find_type == "ios_uiautomator":
+            return self.baseoperate.get_ios_uiautomator(element_info)
+        if find_type == "accessibility_id":
+            return self.baseoperate.get_accessibility_id(element_info)
+        if find_type == "ios_predicate":
+            return self.baseoperate.get_ios_predicate(element_info)
+        if find_type == "ios_class_chain":
+            return self.baseoperate.get_ios_class_chain(element_info)
+        if find_type == "ids":
             elements = self.baseoperate.get_ids(element_info)
-            return elements[index] if index is not None else elements
-        elif find_type == 'class_name':
+            if index is None:
+                raise ValueError("find_type=ids 时必须填写 index")
+            return elements[index]
+        if find_type == "class_name":
             elements = self.baseoperate.get_className(element_info)
-            return elements[index] if index is not None else elements
-        raise ValueError("未知 find_type: %s" % find_type)
+            if index is None:
+                raise ValueError("find_type=class_name 时必须填写 index")
+            return elements[index]
 
+        raise ValueError("未知的 find_type：%s" % find_type)
+
+    def _check_element(self, i):
+        find_type = self.yaml.get_findtype(i)
+        element_info = self.yaml.get_elementinfo(i)
+
+        if find_type == "id":
+            return self.baseoperate.find_id(element_info)
+        if find_type == "xpath":
+            return self.baseoperate.find_xpath(element_info)
+        if find_type == "name":
+            return self.baseoperate.find_xpath_name(element_info)
+        if find_type == "contains_name":
+            return self.baseoperate.find_xpath_contains(element_info)
+        if find_type == "accessibility_id":
+            return self.baseoperate.find_accessibility_id(element_info)
+        if find_type == "ios_predicate":
+            return self.baseoperate.find_ios_predicate(element_info)
+        if find_type == "ios_class_chain":
+            return self.baseoperate.find_ios_class_chain(element_info)
+
+        self._resolve_element(i)
+        return True
+
+    def _repeat(self, i, action):
+        for _ in range(self.yaml.get_backtimes(i)):
+            action()
+
+    def _step_desc(self, i):
+        return self.yaml.get_path(i)
+
+    def _step_label(self, i):
+        return "%s | %s" % (self.yaml.get_title(), self._step_desc(i))
 
     def check_operate_type(self):
-        """
-        按 yaml 配置执行全部步骤。
-
-        流程：
-        1. 遍历 `self.yaml.caselen()` 条 testcase
-        2. 根据 `operate_type` 分发执行（click/long_press/send_keys/clear/back/swipe_*/sleep/keycode/check/element_swipe 等）
-        3. 根据 `find_type` 使用 `Baseoperate` 提供的定位封装
-
-        Raises:
-            Exception: 当元素无法识别或执行失败时抛出（例如点击/长按/输入/清除等分支）。
-        """
-
+        logger.info("开始执行 YAML 用例文件：%s，总步骤数：%s" % (self.path, self.yaml.caselen()))
         for i in range(self.yaml.caselen()):
-            path = self.yaml.get_path(i)
-            body = self.yaml.get_title()
-            log_success = ('操作：' + str(path))
-            log_lose = ('执行失败：文件位置：' + str(body) + ',' + '操作：' + str(path))
+            operate_type = self.yaml.get_operate_type(i)
+            desc = self._step_desc(i)
+            label = self._step_label(i)
+            logger.info("开始执行步骤[%s]：%s，描述：%s" % (i + 1, operate_type, desc))
 
-            # 元素点击操作逻辑
-            if self.yaml.get_operate_type(i) == 'click':
-                # 隐式等待3s
-                self.driver.implicitly_wait(3)
-                try:
-                    log().info(log_success)
-                    self._resolve_element(i).click()
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误(点击)，表明无法识别页面元素，common.operate")
+            try:
+                self._execute_step(i, operate_type)
+                logger.info("步骤[%s]执行成功，描述：%s" % (i + 1, desc))
+            except Exception as exc:
+                logger.error(
+                    "步骤[%s]执行失败：操作=%s，定位方式=%s，定位值=%s，描述=%s，错误=%s"
+                    % (i + 1, operate_type, self.yaml.get_findtype(i), self.yaml.get_elementinfo(i), label, exc)
+                )
+                raise RuntimeError(
+                    "YAML 步骤执行失败：第 %s 步，操作=%s，描述=%s" % (i + 1, operate_type, label)
+                ) from exc
+        logger.info("YAML 用例文件执行完成：%s" % self.path)
 
-            # 元素长按操作逻辑
-            elif self.yaml.get_operate_type(i) == 'long_press':
-                try:
-                    log().info(log_success)
-                    el = self._resolve_element(i)
-                    ActionChains(self.driver).click_and_hold(el=el, duration=self.yaml.get_backtimes(i)).perform()
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误(长按)，表明无法识别页面元素，common.operate")
-
-            # 元素输入文本内容逻辑
-            elif self.yaml.get_operate_type(i) == 'send_keys':
-                self.driver.implicitly_wait(3)
-                try:
-                    log().info(log_success)
-                    self._resolve_element(i).send_keys(self.yaml.get_send_content(i))
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误（输入内容），表明无法识别页面元素，common.operate")
-
-            # 元素清除本文内容逻辑
-            elif self.yaml.get_operate_type(i) == 'clear':
-                self.driver.implicitly_wait(3)
-                try:
-                    log().info(log_success)
-                    self._resolve_element(i).clear()
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误（清除文本），表明无法识别页面元素，common.operate")
-
-            # 返回逻辑
-            elif self.yaml.get_operate_type(i) == 'back':
-                for n in range(self.yaml.get_backtimes(i)):
-                    self.baseoperate.back()
-
-            # 上滑逻辑
-            elif self.yaml.get_operate_type(i) == 'swipe_up':
-                for n in range(self.yaml.get_backtimes(i)):
-                    self.baseoperate.swipe_up()
-
-            # 下滑逻辑
-            elif self.yaml.get_operate_type(i) == 'swipe_down':
-                for n in range(self.yaml.get_backtimes(i)):
-                    self.baseoperate.swipe_down()
-
-            # 右滑逻辑
-            elif self.yaml.get_operate_type(i) == 'swipe_right':
-                for n in range(self.yaml.get_backtimes(i)):
-                    self.baseoperate.swipe_right()
-
-            # 左滑逻辑
-            elif self.yaml.get_operate_type(i) == 'swipe_left':
-                for n in range(self.yaml.get_backtimes(i)):
-                    self.baseoperate.swipe_left()
-
-            # 键盘输入逻辑，可根据键盘键码keyCode表进行输入
-            elif self.yaml.get_operate_type(i) == 'keycode':
-                try:
-                    log().info(log_success)
-                    self.driver.press_keycode(self.yaml.get_backtimes(i))
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误(键盘输入)，表明无法识别页面元素，common.operate")
-
-            # 强制睡眠逻辑
-            elif self.yaml.get_operate_type(i) == 'sleep':
-                for n in range(self.yaml.get_backtimes(i)):
-                    self.baseoperate.sleep()
-
-            # 页面校验逻辑
-            elif self.yaml.get_operate_type(i) == 'check':
-                # 校验
-                self.driver.implicitly_wait(3)
-                if self.yaml.get_findtype(i) == 'id':
-                    self.baseoperate.find_id(self.yaml.get_elementinfo(i))
-                elif self.yaml.get_findtype(i) == 'xpath':
-                    self.baseoperate.find_xpath(self.yaml.get_elementinfo(i))
-                elif self.yaml.get_findtype(i) == 'name':
-                    self.baseoperate.find_xpath_name(self.yaml.get_elementinfo(i))
-                elif self.yaml.get_findtype(i) == 'contains_name':
-                    self.baseoperate.find_xpath_contains(self.yaml.get_elementinfo(i))
-
-            # 元素元素之间滑动逻辑
-            elif self.yaml.get_operate_type(i) == 'element_swipe':
-                # 元素之间滑动逻辑
-                # 隐式等待3s，待处理
-                self.driver.implicitly_wait(3)
-                try:
-                    log().info(log_success)
-
-                    start_find_type = self.yaml.get_findtype(i)
-                    end_find_type = self.yaml.get_end_findtype(i)
-                    index = self.yaml.get_index(i)
-
-                    start_el = self._resolve_scroll_element(
-                        start_find_type, self.yaml.get_elementinfo(i), index
-                    )
-                    end_el = self._resolve_scroll_element(
-                        end_find_type, self.yaml.get_end_elementinfo(i), index
-                    )
-                    self.driver.scroll(start_el, end_el, duration=500)
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误（元素之间滑动），表明无法识别页面元素，common.operate")
-
-            # 坐标与坐标之间滑动逻辑
-            elif self.yaml.get_operate_type(i) == 'swipe_px':
-                # 坐标之间滑动逻辑
-                # 隐式等待3s，待处理
-                self.driver.implicitly_wait(3)
-                try:
-                    for n in range(self.yaml.get_backtimes(i)):
-                        log().info(log_success)
-                        self.baseoperate.swipe_px(self.yaml.get_elementinfo(i),self.yaml.get_findtype(i),self.yaml.get_end_elementinfo(i),self.yaml.get_end_findtype(i))
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误（坐标之间滑动异常_px），common.operate")
-
-            # 页面百分比之间滑动逻辑
-            elif self.yaml.get_operate_type(i) == 'swipe_pt':
-                # 百分比之间滑动逻辑
-                # 隐式等待3s，待处理
-                self.driver.implicitly_wait(3)
-                try:
-                    for n in range(self.yaml.get_backtimes(i)):
-                        log().info(log_success)
-                        self.baseoperate.swipe_pt(self.yaml.get_elementinfo(i),self.yaml.get_findtype(i),self.yaml.get_end_elementinfo(i),self.yaml.get_end_findtype(i))
-                except:
-                    log().error(log_lose)
-                    raise Exception("此处为自定义错误（坐标之间滑动异常_pt），common.operate")
-
-
-# if __name__ == "__main__":
-#     import GetDriver
-#     driver = GetDriver.mydriver()
-#     path = "../testyaml/cm/cm-001addcm.yaml"
-#
-#     cm = Operate(path,driver)
-#     cm.check_operate_type()
-#     cm.back_home()
+    def _execute_step(self, i, operate_type):
+        if operate_type == "click":
+            self._resolve_element(i).click()
+        elif operate_type == "long_press":
+            element = self._resolve_element(i)
+            ActionChains(self.driver).click_and_hold(element).pause(self.yaml.get_backtimes(i)).release().perform()
+        elif operate_type == "send_keys":
+            self._resolve_element(i).send_keys(self.yaml.get_send_content(i))
+        elif operate_type == "clear":
+            self._resolve_element(i).clear()
+        elif operate_type == "back":
+            self._repeat(i, self.baseoperate.back)
+        elif operate_type == "swipe_up":
+            self._repeat(i, self.baseoperate.swipe_up)
+        elif operate_type == "swipe_down":
+            self._repeat(i, self.baseoperate.swipe_down)
+        elif operate_type == "swipe_right":
+            self._repeat(i, self.baseoperate.swipe_right)
+        elif operate_type == "swipe_left":
+            self._repeat(i, self.baseoperate.swipe_left)
+        elif operate_type == "keycode":
+            self.driver.press_keycode(self.yaml.get_backtimes(i))
+            logger.info("Android keycode 输入成功")
+        elif operate_type == "sleep":
+            self._repeat(i, self.baseoperate.sleep)
+        elif operate_type == "check":
+            if not self._check_element(i):
+                logger.error("元素校验失败，已跳过当前 check 步骤并继续执行后续步骤")
+        elif operate_type == "element_swipe":
+            index = self.yaml.get_index(i)
+            start_el = self._resolve_by(self.yaml.get_findtype(i), self.yaml.get_elementinfo(i), index)
+            end_el = self._resolve_by(self.yaml.get_end_findtype(i), self.yaml.get_end_elementinfo(i), index)
+            self.driver.scroll(start_el, end_el, duration=500)
+            logger.info("元素之间滑动成功")
+        elif operate_type == "swipe_px":
+            self._repeat(
+                i,
+                lambda: self.baseoperate.swipe_px(
+                    self.yaml.get_elementinfo(i),
+                    self.yaml.get_findtype(i),
+                    self.yaml.get_end_elementinfo(i),
+                    self.yaml.get_end_findtype(i),
+                ),
+            )
+        elif operate_type == "swipe_pt":
+            self._repeat(
+                i,
+                lambda: self.baseoperate.swipe_pt(
+                    self.yaml.get_elementinfo(i),
+                    self.yaml.get_findtype(i),
+                    self.yaml.get_end_elementinfo(i),
+                    self.yaml.get_end_findtype(i),
+                ),
+            )
+        else:
+            raise ValueError("未知的 operate_type：%s" % operate_type)

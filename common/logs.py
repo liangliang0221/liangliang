@@ -1,87 +1,61 @@
-# @Time    : 2026/05/13
-# @Author  : liangliang
-# @File    : logs.py
-# @Software: PyCharm
-#!/user/bin/env python3
-# -*- coding : utf-8 -*-
-# 用途 : 打印log到日志文件logs中,位置在testlog中显示
-
+# -*- coding: utf-8 -*-
 import logging
 import os
 import time
 
-# 使用相对路径+绝对路径
-PATH = lambda p: os.path.abspath(os.path.join(os.path.dirname(__file__), p))
-log_path = PATH("../log")
+
+def _path(relative_path):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), relative_path))
+
+
+LOG_DIR = _path("../log")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 class log:
-    """
-    日志封装类：将日志同时输出到控制台和落盘文件中（位于 `log/` 目录）。
+    """Small compatibility wrapper around a shared project logger."""
 
-    使用方式：
-        - `log().info("message")`
-        - `log().error("message")`
-    """
+    _logger = None
 
     def __init__(self):
-        """
-        初始化 logger，并根据当前日期生成日志文件名。
-        """
+        if log._logger is None:
+            log._logger = self._build_logger()
+        self.logger = log._logger
 
-        filename = 'Appium-' + ''.join(time.strftime('%Y%m%d')) + ''.join('.txt')  # 设置log名
-        self.logname = os.path.join(log_path, filename)
-        self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
-        # 设置日志输出格式
-        self.formatter = logging.Formatter('[%(asctime)s] - [%(levelname)s] - %(message)s')
+    @staticmethod
+    def _build_logger():
+        filename = "Appium-" + time.strftime("%Y%m%d") + ".txt"
+        log_file = os.path.join(LOG_DIR, filename)
 
-    def output(self, level, message):
-        """
-        输出一条日志。
+        logger = logging.getLogger("appium_ui_auto")
+        logger.setLevel(logging.DEBUG)
+        logger.propagate = False
 
-        Args:
-            level: 日志等级，支持 `info`、`debug`、`warn`、`error`
-            message: 要写入的日志内容
-        """
+        if logger.handlers:
+            return logger
 
-        fh = logging.FileHandler(self.logname, 'a', encoding='utf-8')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(self.formatter)
-        self.logger.addHandler(fh)
+        formatter = logging.Formatter("[%(asctime)s] - [%(levelname)s] - %(message)s")
 
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        ch.setFormatter(self.formatter)
-        self.logger.addHandler(ch)
+        file_handler = logging.FileHandler(log_file, "a", encoding="utf-8")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
-        if level == 'info':
-            self.logger.info(message)
-        elif level == 'debug':
-            self.logger.debug(message)
-        elif level == 'warn':
-            self.logger.warning(message)
-        elif level == 'error':
-            self.logger.error(message)
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.INFO)
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
 
-        self.logger.removeHandler(fh)
-        self.logger.removeHandler(ch)
+        return logger
 
-        fh.close()
-
-    #自定义日志状态
-    def info(self, message: object) -> object:
-        """输出 info 级别日志。"""
-        self.output('info', message)
+    def info(self, message):
+        self.logger.info(message)
 
     def debug(self, message):
-        """输出 debug 级别日志。"""
-        self.output('debug', message)
+        self.logger.debug(message)
 
     def warn(self, message):
-        """输出 warn 级别日志。"""
-        self.output('warn', message)
+        self.logger.warning(message)
 
     def error(self, message):
-        """输出 error 级别日志。"""
-        self.output('error', message)
+        self.logger.error(message)

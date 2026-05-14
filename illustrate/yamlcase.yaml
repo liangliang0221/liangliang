@@ -1,152 +1,230 @@
-#yaml编写内容详解：
-
-#1.element_info: 用于放置元素
-#如id元素、xpath元素、classname元素、常规文本内容、模糊文本内容、安卓定位写法：元素(元素值).元素(元素值)
-
-#2.find_type: 用于放置元素类型
-#1）id（对应上方元素id）
-#2）xpath（对应上方元素xpath）
-#3）ids（对应上方元素id，不唯一）
-#4）class_name（对应上方元素classname）
-#5）name（对应上方常规文本内容）
-#6）contains_name（对应上方模糊文本内容）
-#7）android_uiautomator（采用上方安卓定位写法，可单个可组合）
-
-#3.perate_type: 用于放置用户行为操作
-#1）click（点击操作）
-#2）send_keys（点击后并输入内容）
-#3）swipe_up（上滑操作）
-#4）swipe_down（下滑操作）
-#5）swipe_right（右滑操作）
-#6）swipe_left（左滑操作）
-#7）back（返回）
-#8）check（用于校验页面数据）
-#9）sleep（程序强制睡眠5s）
-#10)clear(用于清除文本)
-#11）element_swipe(用于元素之间的滑动操作)
-#12）coordinate_swip(用于坐标之间的滑动操作)
-
-#4.send_content：用于存放所需输入内容，当perate_type为sendkeys时使用
-#1）test（当前元素中输入“test”）
-#2）abcd（当前元素中输入“abcd”）
-#...
-
-#5.index: 用于放置下标为第几个，坐标从0开始。当find_type为ids或classname时用到，因他们不唯一
-#1）0（下标第一个）
-#2）1（下标第二个）
-#3）2（下标第三个）
-#...
-
-#6.times： 用于放置操作次数，当perate_type为上下左右滑动、睡眠、返回操作时使用
-#1）1（重复操作1次）
-#2）2（重复操作2次）
-#3）3（重复操作3次）
-#...
-
-#7.path：用于放置当前行为操作描述，用于打印日志时使用
-
+# YAML 用例编写说明
+#
+# 这个文件是示例和说明，不建议直接作为真实用例执行。
+# 真实用例文件建议放在 data/模块名/xxx.yaml，并由 conftest/模块封装类调用。
+#
+# 顶层结构:
+# testinfo: 用例文件信息。当前框架使用 testinfo[0].title 作为日志中的用例文件标题。
+# testcase: 步骤列表。框架会按顺序逐条读取并执行 testcase 下的步骤。
+#
+# testcase 单步通用字段:
+# - operate_type: 必填。当前步骤要执行的操作。
+# - path: 建议必填。当前步骤描述，失败日志会显示它，便于定位问题。
+# - element_info: 定位值。点击、输入、清除、校验、元素滑动等需要定位元素的步骤必填。
+# - find_type: 定位方式。和 element_info 配套使用。
+# - end_element_info: 终点元素或终点坐标。element_swipe、swipe_px、swipe_pt 使用。
+# - end_find_type: 终点元素定位方式或终点 y 坐标。element_swipe、swipe_px、swipe_pt 使用。
+# - send_content: 输入内容。仅 send_keys 使用。
+# - index: 元素下标，从 0 开始。仅 ids、class_name 这类返回多个元素的定位方式使用。
+# - times: 重复次数。back、swipe_up、swipe_down、swipe_left、swipe_right、sleep、swipe_px、swipe_pt、keycode 使用。
+#
+# 支持的 operate_type:
+# - click: 点击元素
+# - send_keys: 输入文本
+# - clear: 清空输入框
+# - check: 校验元素是否存在并可见
+# - back: 返回
+# - sleep: 固定等待，每次默认 5 秒
+# - keycode: Android 按键码输入，例如 4 表示返回键
+# - swipe_up: 上滑
+# - swipe_down: 下滑
+# - swipe_left: 左滑
+# - swipe_right: 右滑
+# - swipe_px: 按绝对像素坐标滑动
+# - swipe_pt: 按屏幕百分比坐标滑动，0.5 表示 50%
+# - element_swipe: 从一个元素滚动到另一个元素
+# - long_press: 长按元素，times 表示长按秒数
+#
+# 支持的 find_type:
+# - id: resource-id / accessibility id 形式的 id 定位
+# - ids: 按 id 定位多个元素，必须配 index
+# - xpath: XPath 定位
+# - name: 文本精确匹配，框架会转换成 //*[@text='xxx']
+# - contains_name: 文本模糊匹配
+# - class_name: class name 定位多个元素，必须配 index
+# - android_uiautomator: Android UIAutomator 定位
+# - ios_uiautomator: iOS UIAutomation 定位，偏旧，通常不作为首选
+# - accessibility_id: iOS/Android accessibility id 定位，iOS 推荐首选
+# - ios_predicate: iOS Predicate 定位
+# - ios_class_chain: iOS Class Chain 定位
+#
+# Android 定位建议:
+# 1. 优先使用稳定的 id，例如 com.demo:id/login_button。
+# 2. 其次使用 android_uiautomator，例如 new UiSelector().text("登录")。
+# 3. XPath 尽量只做兜底，层级太深时容易随 UI 调整失效。
+# 4. 文本定位 name/contains_name 适合校验文案或临时补位，不建议作为核心链路唯一定位。
+#
+# iOS 定位建议:
+# 1. accessibility_id 最优先。请让开发给关键控件设置 accessibilityIdentifier。
+# 2. ios_predicate 适合按 name、label、value、type、visible、enabled 等属性组合定位。
+# 3. ios_class_chain 适合层级定位，通常比 iOS XPath 快。
+# 4. XPath 只作为兜底。iOS XPath 慢且容易受层级变化影响。
+#
+# iOS Predicate 常见写法:
+# - label == "登录"
+# - name == "login_button"
+# - value CONTAINS "请输入"
+# - type == "XCUIElementTypeButton" AND visible == 1
+# - label BEGINSWITH "确认"
+# - label ENDSWITH "完成"
+#
+# iOS Class Chain 常见写法:
+# - **/XCUIElementTypeButton[`label == "登录"`]
+# - **/XCUIElementTypeCell[1]
+# - **/XCUIElementTypeTable/**/XCUIElementTypeStaticText[`label CONTAINS "订单"`]
+#
+# 注意事项:
+# - YAML 中包含冒号、反引号、比较表达式、星号开头的 class chain 时，建议用引号包起来。
+# - ids/class_name 必须写 index，否则框架会报 index is required。
+# - back、sleep、swipe_* 这类不需要元素的操作，可以不写 element_info 和 find_type。
+# - check 会返回断言结果；找不到元素时会截图并在日志中记录失败定位信息。
+# - path 写得越清楚，失败时越容易定位是哪一步。
 
 testinfo:
-    - id: 随便填写
-      title: mobile_login（填写用例对应命名）
-      execute: 随便填写
+  - id: demo_case
+    title: mobile_demo
+    execute: 1
 
 testcase:
-#点击类型操作示例，用于元素点击操作行为（click）
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: id、xpath、android_uiautomator、name、contains_name
-      operate_type: click
-      path: 點擊授權
+  - element_info: com.demo:id/login_button
+    find_type: id
+    operate_type: click
+    path: Android 使用 id 点击登录按钮
 
+  - element_info: com.demo:id/account_input
+    find_type: id
+    operate_type: send_keys
+    send_content: test_user
+    path: Android 输入账号
 
-#输入内容操作示例,用于输入文本内容行为（send_keys）
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: id、xpath、android_uiautomator、name、contains_name
-      operate_type: send_keys
-      send_content: 输入内容
-      path: 點擊授權
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: ids、class_name(不管任何行为操作，当为此值的时候，需增加index项)
-      index: 1
-      operate_type: send_keys
-      send_content: 输入内容
-      path: 點擊授權
+  - element_info: com.demo:id/account_input
+    find_type: id
+    operate_type: clear
+    path: Android 清空账号输入框
 
+  - element_info: com.demo:id/list_title
+    find_type: ids
+    index: 0
+    operate_type: click
+    path: Android 点击列表中第一个标题
 
-#上下左右滑动、强制睡眠、返回操作
-    -
-      operate_type: swipe_up、swipe_down、swipe_right、swipe_left、back、sleep
-      times: 1
-      path: 點擊授權
+  - element_info: android.widget.TextView
+    find_type: class_name
+    index: 2
+    operate_type: check
+    path: Android 校验第三个 TextView 可见
 
+  - element_info: new UiSelector().text("登录")
+    find_type: android_uiautomator
+    operate_type: click
+    path: Android 使用 UIAutomator 文本点击登录
 
-#校验页面是否存在元素
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: id、xpath、name、contains_name（暂时只做当前4种）
-      operate_type: check
-      path: 點擊授權
+  - element_info: new UiSelector().resourceId("com.demo:id/login_button").enabled(true)
+    find_type: android_uiautomator
+    operate_type: check
+    path: Android 使用 UIAutomator 组合属性校验登录按钮
 
+  - element_info: //*[@text='登录']
+    find_type: xpath
+    operate_type: check
+    path: 使用 XPath 校验登录文案
 
-#清除文本操作，与click点击编写一致
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: id、xpath、android_uiautomator、name、contains_name
-      operate_type: clear
-      path: 點擊授權
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: ids、class_name(不管任何行为操作，当为此值的时候，需增加index项)
-      operate_type: clear
-      index: 1
-      path: 點擊授權
+  - element_info: 登录
+    find_type: name
+    operate_type: click
+    path: 使用文本精确匹配点击登录
 
+  - element_info: 登
+    find_type: contains_name
+    operate_type: check
+    path: 使用文本模糊匹配校验登录文案
 
-#元素与元素之间的滑动
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: id
-      end_element_info: com.android.permissioncontroller:id/permission_allow_button
-      end_find_type: id
-      operate_type: element_swipe
-      path: 元素之间的滑动
+  - element_info: login_button
+    find_type: accessibility_id
+    operate_type: click
+    path: iOS 使用 accessibility id 点击登录按钮
 
+  - element_info: 'label == "登录" AND visible == 1'
+    find_type: ios_predicate
+    operate_type: check
+    path: iOS 使用 Predicate 校验登录按钮可见
 
-#坐标与坐标之间的滑动
-    -
-      element_info: star_x
-      find_type: star_y
-      end_element_info: end_x
-      end_find_type: end_y
-      operate_type: swipe_px
-      times: 1
-      path: 坐标之间的滑动
+  - element_info: 'type == "XCUIElementTypeTextField" AND value CONTAINS "手机号"'
+    find_type: ios_predicate
+    operate_type: send_keys
+    send_content: "13800000000"
+    path: iOS 使用 Predicate 定位手机号输入框并输入
 
-#坐标与坐标之间的滑动
-    -
-      element_info: star_x
-      find_type: star_y
-      end_element_info: end_x
-      end_find_type: end_y
-      operate_type: swipe_pt
-      times: 1
-      path: 百分比之间的滑动
+  - element_info: '**/XCUIElementTypeButton[`label == "登录"`]'
+    find_type: ios_class_chain
+    operate_type: click
+    path: iOS 使用 Class Chain 点击登录按钮
 
-#特殊类，当find_type=ids，class_name
-    -
-      element_info: com.android.permissioncontroller:id/permission_allow_button
-      find_type: ids、class_name(不管任何行为操作，当为此值的时候，需增加index项)
-      index: 1
-      operate_type: 任何行为（click、send_keys等）
-      path: 點擊授權
+  - element_info: '**/XCUIElementTypeCell[1]'
+    find_type: ios_class_chain
+    operate_type: check
+    path: iOS 使用 Class Chain 校验第一个 Cell
 
+  - operate_type: back
+    times: 1
+    path: 返回上一页
 
-#特殊类，当find_type=ids，class_name
-    -
-      element_info: index(2).className('hi')
-      find_type: android_uiautomator（表示为安卓定位写法[不支持ios]，可用于单个或者多个元素类型定位，写法：元素(元素值).元素(元素值)）
-      operate_type: click
-      path: 點擊授權
+  - operate_type: sleep
+    times: 1
+    path: 固定等待 5 秒
+
+  - operate_type: swipe_up
+    times: 2
+    path: 连续上滑两次
+
+  - operate_type: swipe_down
+    times: 1
+    path: 下滑一次
+
+  - operate_type: swipe_left
+    times: 1
+    path: 左滑一次
+
+  - operate_type: swipe_right
+    times: 1
+    path: 右滑一次
+
+  - element_info: 300
+    find_type: 1200
+    end_element_info: 300
+    end_find_type: 300
+    operate_type: swipe_px
+    times: 1
+    path: 使用绝对像素坐标从下往上滑动
+
+  - element_info: 0.5
+    find_type: 0.8
+    end_element_info: 0.5
+    end_find_type: 0.2
+    operate_type: swipe_pt
+    times: 1
+    path: 使用百分比坐标从屏幕下方滑到上方
+
+  - element_info: com.demo:id/start_item
+    find_type: id
+    end_element_info: com.demo:id/end_item
+    end_find_type: id
+    operate_type: element_swipe
+    path: Android 从起始元素滚动到目标元素
+
+  - element_info: login_button
+    find_type: accessibility_id
+    end_element_info: 'label == "忘记密码"'
+    end_find_type: ios_predicate
+    operate_type: element_swipe
+    path: iOS 从登录按钮滚动到忘记密码文案
+
+  - element_info: com.demo:id/delete_button
+    find_type: id
+    operate_type: long_press
+    times: 2
+    path: 长按删除按钮 2 秒
+
+  - operate_type: keycode
+    times: 4
+    path: Android 发送返回键 keycode

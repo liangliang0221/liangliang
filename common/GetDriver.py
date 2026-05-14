@@ -1,52 +1,60 @@
-# -*-coding: utf-8 -*-
-# @Time    : 2026/05/13
-# @Author  : liangliang
-# @File    : GetDriver.py
-# @Software: PyCharm
-
+# -*- coding: utf-8 -*-
 from appium import webdriver
-from common.ReadFile import *
-from selenium.common.exceptions import WebDriverException
-from common.logs import log
 from appium.options.common import AppiumOptions
+from selenium.common.exceptions import WebDriverException
+
+from common.ReadFile import ReadFile
+from common.logs import log
 
 
-log = log()
+logger = log()
 
 
 def yaml_profile_data(address):
-    """
-    根据 yaml 配置创建并启动 Appium `Remote` WebDriver。
+    """根据 YAML 配置创建 Appium Remote WebDriver。"""
+    data = ReadFile(address).data
+    required_keys = [
+        "platformName",
+        "platformVersion",
+        "deviceName",
+        "appPackage",
+        "appActivity",
+        "noReset",
+        "unicodeKeyboard",
+        "resetKeyboard",
+        "ensureWebviewsHavePages",
+        "newCommandTimeout",
+        "ip",
+        "port",
+    ]
+    missing_keys = [key for key in required_keys if key not in data]
+    if missing_keys:
+        raise KeyError("driver 配置缺少必填项：%s" % ", ".join(missing_keys))
 
-    Args:
-        address: yaml 配置文件路径（用于读取平台信息、设备信息以及 App 启动信息）
+    driver_caps = {
+        "platformName": data["platformName"],
+        "platformVersion": str(data["platformVersion"]),
+        "deviceName": data["deviceName"],
+        "appPackage": data["appPackage"],
+        "appActivity": data["appActivity"],
+        "noReset": data["noReset"],
+        "unicodeKeyboard": data["unicodeKeyboard"],
+        "resetKeyboard": data["resetKeyboard"],
+        "ensureWebviewsHavePages": data["ensureWebviewsHavePages"],
+        "newCommandTimeout": data["newCommandTimeout"],
+    }
+    options = AppiumOptions()
+    options.load_capabilities(driver_caps)
 
-    Returns:
-        Appium WebDriver: 驱动实例；如果创建失败则返回 `None`（同时会写入日志）。
-    """
+    server_url = "http://%s:%s/wd/hub" % (data["ip"], data["port"])
+    logger.info(
+        "准备启动 Appium driver：server=%s，platform=%s，device=%s，appPackage=%s，appActivity=%s"
+        % (server_url, data["platformName"], data["deviceName"], data["appPackage"], data["appActivity"])
+    )
     try:
-        data = ReadFile(address).data
-        driver_caps = {
-                'platformName': data['platformName'],
-                'platformVersion': str(data['platformVersion']),
-                'deviceName': data['deviceName'],
-                'appPackage': data['appPackage'],
-                'appActivity': data['appActivity'],
-                'noReset': data['noReset'],
-                'unicodeKeyboard': data['unicodeKeyboard'],
-                'resetKeyboard': data['resetKeyboard'],
-                'ensureWebviewsHavePages': data['ensureWebviewsHavePages'],
-                'newCommandTimeout':data['newCommandTimeout']
-            }
-        options = AppiumOptions()
-        options.load_capabilities(driver_caps)
-
-        driver = webdriver.Remote('http://' + str(data['ip']) + ':' + str(data['port']) + '/wd/hub', options=options)
-        print(driver)
-        log.info('获取driver并启动成功')
+        driver = webdriver.Remote(server_url, options=options)
+        logger.info("Appium driver 启动成功：%s" % server_url)
         return driver
-    except WebDriverException:
-        log.warn('获取driver失败')
-
-# if __name__ == "__main__":
-#     yaml_profile_data("../config/activity.yaml")
+    except WebDriverException as exc:
+        logger.error("Appium driver 启动失败：server=%s，错误=%s" % (server_url, exc))
+        raise
