@@ -1,0 +1,36 @@
+#!/user/bin/env python3
+# -*- coding : utf-8 -*-
+#编写人 ：liangliang
+#用途：此为启动参数配置文件，可进行更换应用、地址、端口等
+#1.清除日志：adb logcat -c
+#2.启动日志：adb logcat ActivityManager:I *:s
+#线上包名：adb shell dumpsys activity | findstr "mResume"
+#mResumedActivity: ActivityRecord{545eb12 u0 com.cwj.hsing/com.utalk.hsing.activity.StartActivity t28}
+#noReset: False（重置app）:决定是否重置app
+
+#platformName: Android
+#platformVersion: 8.1.0
+#deviceName: JSN-AL00a
+#appPackage: com.cwj.hsing
+#appActivity: com.utalk.hsing.activity.StartActivity
+#noReset: True
+#unicodeKeyboard: True
+#resetKeyboard: False
+#ensureWebviewsHavePages: True
+#ip: 127.0.0.1
+#port: 4723
+
+platformName: Android
+platformVersion: 11
+deviceName: SM_A205F
+appPackage: com.cwj.hsing
+appActivity: com.utalk.hsing.activity.StartActivity
+noReset: True
+unicodeKeyboard: True
+resetKeyboard: True
+ensureWebviewsHavePages: True
+newCommandTimeout: 60
+ip: 127.0.0.1
+port: 4723
+
+

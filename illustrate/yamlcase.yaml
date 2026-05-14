@@ -1,0 +1,152 @@
+#yaml编写内容详解：
+
+#1.element_info: 用于放置元素
+#如id元素、xpath元素、classname元素、常规文本内容、模糊文本内容、安卓定位写法：元素(元素值).元素(元素值)
+
+#2.find_type: 用于放置元素类型
+#1）id（对应上方元素id）
+#2）xpath（对应上方元素xpath）
+#3）ids（对应上方元素id，不唯一）
+#4）class_name（对应上方元素classname）
+#5）name（对应上方常规文本内容）
+#6）contains_name（对应上方模糊文本内容）
+#7）android_uiautomator（采用上方安卓定位写法，可单个可组合）
+
+#3.perate_type: 用于放置用户行为操作
+#1）click（点击操作）
+#2）send_keys（点击后并输入内容）
+#3）swipe_up（上滑操作）
+#4）swipe_down（下滑操作）
+#5）swipe_right（右滑操作）
+#6）swipe_left（左滑操作）
+#7）back（返回）
+#8）check（用于校验页面数据）
+#9）sleep（程序强制睡眠5s）
+#10)clear(用于清除文本)
+#11）element_swipe(用于元素之间的滑动操作)
+#12）coordinate_swip(用于坐标之间的滑动操作)
+
+#4.send_content：用于存放所需输入内容，当perate_type为sendkeys时使用
+#1）test（当前元素中输入“test”）
+#2）abcd（当前元素中输入“abcd”）
+#...
+
+#5.index: 用于放置下标为第几个，坐标从0开始。当find_type为ids或classname时用到，因他们不唯一
+#1）0（下标第一个）
+#2）1（下标第二个）
+#3）2（下标第三个）
+#...
+
+#6.times： 用于放置操作次数，当perate_type为上下左右滑动、睡眠、返回操作时使用
+#1）1（重复操作1次）
+#2）2（重复操作2次）
+#3）3（重复操作3次）
+#...
+
+#7.path：用于放置当前行为操作描述，用于打印日志时使用
+
+
+testinfo:
+    - id: 随便填写
+      title: mobile_login（填写用例对应命名）
+      execute: 随便填写
+
+testcase:
+#点击类型操作示例，用于元素点击操作行为（click）
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: id、xpath、android_uiautomator、name、contains_name
+      operate_type: click
+      path: 點擊授權
+
+
+#输入内容操作示例,用于输入文本内容行为（send_keys）
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: id、xpath、android_uiautomator、name、contains_name
+      operate_type: send_keys
+      send_content: 输入内容
+      path: 點擊授權
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: ids、class_name(不管任何行为操作，当为此值的时候，需增加index项)
+      index: 1
+      operate_type: send_keys
+      send_content: 输入内容
+      path: 點擊授權
+
+
+#上下左右滑动、强制睡眠、返回操作
+    -
+      operate_type: swipe_up、swipe_down、swipe_right、swipe_left、back、sleep
+      times: 1
+      path: 點擊授權
+
+
+#校验页面是否存在元素
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: id、xpath、name、contains_name（暂时只做当前4种）
+      operate_type: check
+      path: 點擊授權
+
+
+#清除文本操作，与click点击编写一致
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: id、xpath、android_uiautomator、name、contains_name
+      operate_type: clear
+      path: 點擊授權
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: ids、class_name(不管任何行为操作，当为此值的时候，需增加index项)
+      operate_type: clear
+      index: 1
+      path: 點擊授權
+
+
+#元素与元素之间的滑动
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: id
+      end_element_info: com.android.permissioncontroller:id/permission_allow_button
+      end_find_type: id
+      operate_type: element_swipe
+      path: 元素之间的滑动
+
+
+#坐标与坐标之间的滑动
+    -
+      element_info: star_x
+      find_type: star_y
+      end_element_info: end_x
+      end_find_type: end_y
+      operate_type: swipe_px
+      times: 1
+      path: 坐标之间的滑动
+
+#坐标与坐标之间的滑动
+    -
+      element_info: star_x
+      find_type: star_y
+      end_element_info: end_x
+      end_find_type: end_y
+      operate_type: swipe_pt
+      times: 1
+      path: 百分比之间的滑动
+
+#特殊类，当find_type=ids，class_name
+    -
+      element_info: com.android.permissioncontroller:id/permission_allow_button
+      find_type: ids、class_name(不管任何行为操作，当为此值的时候，需增加index项)
+      index: 1
+      operate_type: 任何行为（click、send_keys等）
+      path: 點擊授權
+
+
+#特殊类，当find_type=ids，class_name
+    -
+      element_info: index(2).className('hi')
+      find_type: android_uiautomator（表示为安卓定位写法[不支持ios]，可用于单个或者多个元素类型定位，写法：元素(元素值).元素(元素值)）
+      operate_type: click
+      path: 點擊授權

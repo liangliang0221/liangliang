@@ -1,0 +1,112 @@
+testinfo:
+    - id: wowo_ui_treehole_current_page_elements
+      title: 星野APP当前心灵树洞页UI元素定位清单
+      execute: 1
+testcase:
+    -
+      element_info: 
+      find_type: xpath
+      operate_type: sleep
+      times: 1
+      path: 等待1秒，确保页面加载完成
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/composePlayEntry"]/android.view.View[1]/androidx.compose.ui.viewinterop.ViewFactoryHolder[2]
+      find_type: xpath
+      operate_type: click
+      path: 点击心灵树洞入口，进入树洞页面
+    -
+      element_info: 
+      find_type: xpath
+      operate_type: sleep
+      times: 1
+      path: 等待1秒，确保页面加载完成
+    -
+      element_info: //androidx.compose.ui.platform.ComposeView[1]
+      find_type: xpath
+      operate_type: check
+      path: 验证心灵树洞页面Compose根容器存在，当前Activity为TreeHoleActivity
+    -
+      element_info: //androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]
+      find_type: xpath
+      operate_type: check
+      path: 验证心灵树洞页面主内容根节点存在，承载星空背景、弹幕气泡和底部发布入口
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 验证顶部标题显示为心灵树洞
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[1]
+      find_type: xpath
+      operate_type: check
+      path: 验证左上角返回箭头显示，树洞页面返回入口可交互
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]
+      find_type: xpath
+      operate_type: click
+      path: 点击右上角我的树洞入口，进入个人树洞消息/记录面板
+    -
+      element_info: 
+      find_type: 
+      operate_type: sleep
+      times: 1
+      path: 等待1秒，确保页面加载完成
+    -
+      element_info: 
+      find_type: 
+      operate_type: back
+      times: 1
+      path: 返回上一页/关闭当前弹层，恢复到当前心灵树洞页
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]
+      find_type: xpath
+      operate_type: check
+      path: 验证星空背景和树洞弹幕承载区域存在
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[3]/android.view.View[10]
+      find_type: xpath
+      operate_type: click
+      path: 点击屏幕上方居中的树洞气泡
+    -
+      element_info: 
+      find_type: 
+      operate_type: back
+      times: 1
+      path: 返回上一页/关闭当前弹层，恢复到当前心灵树洞页
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[12]
+      find_type: xpath
+      operate_type: check
+      path: 验证底部树洞陪伴角色插画显示在发布入口左侧
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[4]
+      find_type: xpath
+      operate_type: click
+      path: 点击底部说出你的小情绪发布入口，进入树洞发布输入面板
+    -
+      element_info: 
+      find_type: 
+      operate_type: back
+      times: 1
+      path: 返回上一页/关闭当前弹层，恢复到当前心灵树洞页
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[4]/android.view.View[2]/android.view.View[1]
+      find_type: xpath
+      operate_type: check
+      path: 验证底部发布入口左侧头像/星球图标显示
+    -
+      element_info: //*[@resource-id="com.xinxin.wowo:id/action_bar_root"]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[4]/android.view.View[4]
+      find_type: xpath
+      operate_type: check
+      path: 验证底部发布入口右侧编辑图标显示
+    -
+      element_info: 
+      find_type: 
+      operate_type: back
+      times: 1
+      path: 返回上一页/关闭当前弹层，返回到首页
+    -
+      element_info: //*[@text='首頁']
+      find_type: xpath
+      operate_type: check
+      path: 验证底部导航首页文案显示

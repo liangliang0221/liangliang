@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+log/
+*.log
+*.log.*
+
+# Output
+output/
+ouput/
+
+# Test
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual environment
+venv/
+env/
+*.egg-info/
