@@ -1,34 +1,9 @@
-# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# Logs
-log/
-*.log
-*.log.*
-
-# Output
-output/
-ouput/
-
-# Test
+*.py[cod]
 .pytest_cache/
-
-# OS
+.idea/
+log/
+ouput/temp/
+ouput/report/
+*.log
 .DS_Store
-Thumbs.db
-
-# Virtual environment
-venv/
-env/
-*.egg-info/

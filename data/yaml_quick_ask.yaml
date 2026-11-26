@@ -1,0 +1,352 @@
+# 星窩 APP「快速提問」全量用例（相对结构 xpath 版）
+# ------------------------------------------------------------
+# 定位规范：xpath 一律使用「相对结构路径」，以容器锚点起算，不写 /hierarchy 绝对根路径
+#   首页：   //androidx.recyclerview.widget.RecyclerView
+#   同好页： //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]
+#            /android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]
+#            /androidx.recyclerview.widget.RecyclerView[1]   ← 同好页内层 RecyclerView
+#   提問页： //android.webkit.WebView/android.webkit.WebView   ← 内层 WebView
+# 所有路径均由真机 dump（u2_home.xml / u2_fellow.xml / u2_ask.xml）自动推导，
+# 并逐条离线校验 hits=1（22/22 通过）；[n] 表示同类兄弟节点中的序号。
+# ------------------------------------------------------------
+# 重要：快速提問页实测为 WebView（android.webkit.WebView）嵌套，
+#      页面元素位于 WEBVIEW 上下文，原生 context 下取不到；
+#      执行提問页相关步骤前需 switch_to.context('WEBVIEW_com.xinxin.wowo')。
+#      当前框架 Operate.py 未做上下文切换，提問页步骤会失败，需先补该能力。
+# ------------------------------------------------------------
+testinfo:
+    - id: xingwo_quick_ask_full
+      title: 星窩APP快速提問全量用例
+      execute: 1
+
+testcase:
+    # ================= 前置：回首页 =================
+    -
+      element_info: com.xinxin.wowo:id/navRooms
+      find_type: id
+      operate_type: click
+      path: 前置-点击底部「首頁」回到首页
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 前置-等待首页渲染
+
+    # ================= 用例1：首页快速提問模块 =================
+    # 文本：快速提問：{轮播问题}
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[4]/android.view.View[5]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例1-校验首页「快速提問」模块展示
+
+    # ================= 用例2：点击首页模块问题 =================
+    # 文本：快速提問：{轮播问题}
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[4]/android.view.View[5]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: click
+      path: 用例2-点击首页快速提問模块中的问题
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 3
+      path: 用例2-等待跳转快速提問页
+
+    # ================= 用例7：快速提問页元素展示（WebView） =================
+    # 文本：快速提問（页面标题）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验提問页标题「快速提問」
+    # 文本：猜你想問（模块标题）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验「猜你想問」模块标题
+    # 文本：換一換
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验「換一換」按钮
+    # 文本：適合離職轉行或創業嗎？（推荐问题1）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[2]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验推荐问题1
+    # 文本：我們適合步入婚姻嗎？（推荐问题2）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[3]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验推荐问题2
+    # 文本：未來3個月我的感情運勢如何？（推荐问题3）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[4]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验推荐问题3
+    # 文本：工作是否會有小人阻礙？（推荐问题4）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[5]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验推荐问题4
+    # 文本：現在適合投資理財嗎？（输入框预填）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验问题输入框存在
+    # 文本：10/50（字数计数器）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验输入框字数计数器
+    # 文本：塔羅牌陣
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验「塔羅牌陣」区块标题
+    # 描述：過去
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[2]/android.view.View[1]/android.widget.Image[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验塔罗牌位「過去」
+    # 描述：現在
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[2]/android.view.View[2]/android.widget.Image[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验塔罗牌位「現在」
+    # 描述：未來
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[2]/android.view.View[3]/android.widget.Image[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验塔罗牌位「未來」
+    # 文本：1000+專業真人老師解答
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[3]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验老师解答宣传文案
+    # 文本：針對你的問題給出專業指引
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[3]/android.widget.TextView[2]
+      find_type: xpath
+      operate_type: check
+      path: 用例7-校验老师解答副文案
+
+    # ================= 用例10：提問页换一换 =================
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[1]
+      find_type: xpath
+      operate_type: click
+      path: 用例10-点击提問页「換一換」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 用例10-等待推荐问题刷新
+
+    # ================= 用例11：提問页点击推荐问题 =================
+    # 推荐问题1（第1个 Button 为「換一換」，故问题从 Button[2] 起）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.widget.Button[2]
+      find_type: xpath
+      operate_type: click
+      path: 用例11-点击提問页第一条推荐问题
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 用例11-等待问题填入输入框
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例11-校验输入框已填入所选问题
+
+    # ================= 用例8：提問页返回 =================
+    -
+      element_info:
+      find_type:
+      operate_type: back
+      times: 1
+      path: 用例8-返回上一页
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 用例8-等待返回完成
+
+    # ================= 用例3：同好页猜你想問模块（底部导航第二个） =================
+    -
+      element_info: com.xinxin.wowo:id/navFellow
+      find_type: id
+      operate_type: click
+      path: 用例3-点击底部「同好」（第二个）进入同好页
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 3
+      path: 用例3-等待同好页加载
+    # 文本：猜你想問｜雙師解答
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例3-校验「猜你想問｜雙師解答」标题
+    # 文本：換一換
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.view.View[1]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例3-校验「換一換」按钮
+    # 文本：桃花運何時會到來？
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例3-校验推荐问题1
+    # 文本：兩個選項我該如何抉擇？
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.view.View[3]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例3-校验推荐问题2
+    # 文本：何時可以穩定增加收入？
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.view.View[4]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例3-校验推荐问题3
+    # 输入框（占位：其他困惑，歡迎輸入提問）
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例3-校验问题输入框
+
+    # ================= 用例4：同好页换一批 =================
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.view.View[1]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: click
+      path: 用例4-点击同好页「換一換」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 用例4-等待推荐问题刷新
+
+    # ================= 用例5：同好页点击推荐问题 =================
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: click
+      path: 用例5-点击同好页第一条推荐问题
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 3
+      path: 用例5-等待跳转快速提問页
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例5-校验已跳转快速提問页
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例5-校验问题已自动填入输入框
+    -
+      element_info:
+      find_type:
+      operate_type: back
+      times: 1
+      path: 用例5-返回同好页
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 用例5-等待返回同好页
+
+    # ================= 用例6：同好页输入自定义问题回车 =================
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: click
+      path: 用例6-点击问题输入框
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: clear
+      path: 用例6-清空输入框
+    -
+      element_info: //androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout[1]/android.view.ViewGroup[1]/androidx.viewpager.widget.ViewPager[1]/androidx.recyclerview.widget.RecyclerView[1]/android.widget.FrameLayout[1]/androidx.compose.ui.platform.ComposeView[1]/android.view.View[1]/android.view.View[1]/android.view.View[5]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: send_keys
+      send_content: '最近工作壓力很大，想問何時能轉運？'
+      path: 用例6-输入自定义问题
+    -
+      element_info:
+      find_type:
+      operate_type: keycode
+      times: 66
+      path: 用例6-按回车提交问题
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 3
+      path: 用例6-等待跳转快速提問页
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.view.View[1]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 用例6-校验已跳转快速提問页
+
+    # ================= 边界：输入 50 字上限（提問页输入框） =================
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: clear
+      path: 边界-清空提問页输入框
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText[1]
+      find_type: xpath
+      operate_type: send_keys
+      send_content: '這是一段用來測試快速提問輸入框五十字上限的邊界測試文本內容總共應該超過五十個字請確認只能輸入五十個字'
+      path: 边界-输入超过 50 个中文字
+    # 计数器节点（仅做存在性校验；"50/50" 文本需脚本断言）
+    -
+      element_info: //android.webkit.WebView/android.webkit.WebView/android.view.View[1]/android.view.View[1]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.TextView[1]
+      find_type: xpath
+      operate_type: check
+      path: 边界-校验字数计数器存在（应显示 50/50）
+
+# ============================================================
+# 未覆盖项
+#   1. 「立即抽牌」按钮位于首屏之外（dump 可视区到 y≈2174），需滚动后补抓
+#   2. 用例1「每 3 秒轮播」需两次 dump 比对文案，yaml 单次执行无法断言
+#   3. 用例10「换一批」后文案变化同理，需脚本比对
+# ============================================================

@@ -1,0 +1,127 @@
+# 歡歌 APP 修改暱稱流程
+# 包名: com.subto.osqui
+# 路径: 首頁(MainActivity) → 底部导航「我的」 → 「個人主頁」(UserSpaceActivity)
+#        → 右上角「編輯資料」(UserInfoActivity) → 「暱稱」 → 修改为 3686 → 儲存
+# 前提: 已登录并停留在首頁（底部导航可见）
+# 元素 id / xpath 均来自真机 uiautomator dump 实测确认
+testinfo:
+    - id: huange_edit_nickname
+      title: 歡歌APP修改暱稱為3686
+      execute: 1
+testcase:
+    # ---------- 首頁 MainActivity ----------
+    -
+      element_info: com.subto.osqui:id/rl_bottom_tab
+      find_type: id
+      operate_type: check
+      path: 校验已登录进入首頁（底部导航 rl_bottom_tab 存在）
+    # 底部「我的」tab 无独立 id，取 rl_bottom_tab 下第 5 个 RelativeLayout（首页/Party/唱歌/訊息/我的）
+    # 备选：//*[@resource-id='com.subto.osqui:id/rl_bottom_tab']//*[@text='我的']/..
+    -
+      element_info: //*[@resource-id='com.subto.osqui:id/rl_bottom_tab']//android.widget.RelativeLayout[5]
+      find_type: xpath
+      operate_type: click
+      path: 点击底部导航「我的」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 等待「我的」页加载
+    # ---------- 我的页 ----------
+    -
+      element_info: com.subto.osqui:id/tv_to_personal_info
+      find_type: id
+      operate_type: check
+      path: 校验「個人主頁」入口存在
+    -
+      element_info: com.subto.osqui:id/tv_to_personal_info
+      find_type: id
+      operate_type: click
+      path: 点击「個人主頁」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 等待个人主页加载
+    # ---------- 个人主页 UserSpaceActivity ----------
+    -
+      element_info: com.subto.osqui:id/edit_img
+      find_type: id
+      operate_type: check
+      path: 校验右上角「編輯資料」按钮存在（content-desc=編輯資料）
+    -
+      element_info: com.subto.osqui:id/edit_img
+      find_type: id
+      operate_type: click
+      path: 点击右上角「編輯資料」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 2
+      path: 等待編輯資料页加载
+    # ---------- 編輯資料页 UserInfoActivity ----------
+    -
+      element_info: com.subto.osqui:id/activity_user_info_nick_layout
+      find_type: id
+      operate_type: check
+      path: 校验「暱稱」行存在
+    -
+      element_info: com.subto.osqui:id/activity_user_info_nick_layout
+      find_type: id
+      operate_type: click
+      path: 点击「暱稱」行，进入昵称修改页
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 1
+      path: 等待昵称修改页加载
+    # ---------- 昵称修改页（EditActivity，标题「暱稱」） ----------
+    -
+      element_info: com.subto.osqui:id/edit_activity_et
+      find_type: id
+      operate_type: check
+      path: 校验昵称输入框已出现（默认回填当前暱称）
+    -
+      element_info: com.subto.osqui:id/edit_activity_et
+      find_type: id
+      operate_type: click
+      path: 点击昵称输入框获取焦点
+    -
+      element_info: com.subto.osqui:id/edit_activity_et
+      find_type: id
+      operate_type: clear
+      path: 清空昵称输入框（原昵称 Hell068600）
+    -
+      element_info: com.subto.osqui:id/edit_activity_et
+      find_type: id
+      operate_type: send_keys
+      send_content: '3686'
+      path: 输入新昵称 3686
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 1
+      path: 等待输入回显并激活「儲存」
+    # 右上角「儲存」按钮（done_menu_id）；输入框初始无改动时该按钮为 disabled
+    -
+      element_info: com.subto.osqui:id/done_menu_id
+      find_type: id
+      operate_type: click
+      path: 点击右上角「儲存」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 3
+      path: 等待保存结果返回
+    # ---------- 保存结果校验 ----------
+    -
+      element_info: //*[@resource-id='com.subto.osqui:id/activity_user_info_nick_tv' and @text='3686']
+      find_type: xpath
+      operate_type: check
+      path: 校验返回編輯資料页且昵称已变为 3686

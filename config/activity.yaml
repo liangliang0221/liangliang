@@ -1,6 +1,6 @@
 #!/user/bin/env python3
 # -*- coding : utf-8 -*-
-#编写人 ：liangliang
+#编写人 ：zhenhai
 #用途：此为启动参数配置文件，可进行更换应用、地址、端口等
 #1.清除日志：adb logcat -c
 #2.启动日志：adb logcat ActivityManager:I *:s
@@ -37,11 +37,11 @@
 platformName: Android
 platformVersion: 13.0
 deviceName: SM-A528B
-appPackage: com.xinxin.wowo
-appActivity: com.newbr.soundwave.function.launch.ui.SplashActivity
+appPackage: com.subto.osqui
+appActivity: com.utalk.hsing.activity.StartActivity
 noReset: True
 unicodeKeyboard: True
-resetKeyboard: False
+resetKeyboard: True
 ensureWebviewsHavePages: True
 newCommandTimeout: 60
 ip: 127.0.0.1

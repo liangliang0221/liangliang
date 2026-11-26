@@ -1,0 +1,113 @@
+# 歡歌 APP 手機號 + 密碼 登入流程
+# 包名: com.subto.osqui
+# 启动页: StartActivity → GuideActivity（歡歌登入落地页，含背景动效）
+#          → AccountLoginActivity（手機登入，手机号+密码同页）
+# 账号: +886-13527633686  →  地区 台灣+886（默认选中），本地号码 13527633686
+# 密码: 123456
+# 页面元素 id 均来自真机实测：
+#   GuideActivity 因背景动效无法 idle，dump 不出层级，改用 adb shell dumpsys activity top 取 View Hierarchy 确认
+#   AccountLoginActivity / MainActivity 用 adb shell uiautomator dump 确认
+testinfo:
+    - id: huange_phone_password_login
+      title: 歡歌APP手機號密碼登入
+      execute: 1
+testcase:
+    # ---------- 启动落地页 GuideActivity ----------
+    -
+      element_info: com.subto.osqui:id/login_by_phone
+      find_type: id
+      operate_type: check
+      path: 校验启动落地页存在「手机登录」入口（GuideActivity）
+    -
+      element_info: com.subto.osqui:id/cl_google_login
+      find_type: id
+      operate_type: check
+      path: 校验「使用Google登入」按钮存在
+    -
+      element_info: com.subto.osqui:id/login_by_fb
+      find_type: id
+      operate_type: check
+      path: 校验「使用Facebook登入」按钮存在
+    -
+      element_info: com.subto.osqui:id/compose_view_protocol
+      find_type: id
+      operate_type: check
+      path: 校验底部「同意《歡歌用戶服務協議》、《隱私聲明》」勾选区存在
+    -
+      element_info: com.subto.osqui:id/login_by_phone
+      find_type: id
+      operate_type: click
+      path: 点击「手机登录」图标，进入手機登入页
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 1
+      path: 等待手機登入页加载
+    # ---------- 手機登入页：手机号 ----------
+    -
+      element_info: com.subto.osqui:id/toolbar_title
+      find_type: id
+      operate_type: check
+      path: 校验标题栏「手機登入」已展示
+    -
+      element_info: com.subto.osqui:id/tv_choose_country_code
+      find_type: id
+      operate_type: check
+      path: 校验地区码「台灣+886」已展示
+    -
+      element_info: com.subto.osqui:id/activity_account_login_phone_number
+      find_type: id
+      operate_type: clear
+      path: 清空手机号输入框（上次登入会残留旧号码）
+    -
+      element_info: com.subto.osqui:id/activity_account_login_phone_number
+      find_type: id
+      operate_type: send_keys
+      send_content: '13527633686'
+      path: 输入手机号 13527633686
+    -
+      element_info: com.subto.osqui:id/activity_account_login_btn_login
+      find_type: id
+      operate_type: click
+      path: 点击「下一步」（手机号合法后按钮由置灰变为可点击）
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 1
+      path: 等待密码输入区展开
+    # ---------- 手機登入页：密码（同一页下方展开） ----------
+    -
+      element_info: com.subto.osqui:id/activity_account_login_password
+      find_type: id
+      operate_type: check
+      path: 校验密码输入框已出现
+    -
+      element_info: com.subto.osqui:id/activity_account_login_password
+      find_type: id
+      operate_type: click
+      path: 点击密码输入框获取焦点
+    -
+      element_info: com.subto.osqui:id/activity_account_login_password
+      find_type: id
+      operate_type: send_keys
+      send_content: '123456'
+      path: 输入密码 123456
+    -
+      element_info: com.subto.osqui:id/activity_account_login_btn_login
+      find_type: id
+      operate_type: click
+      path: 点击「登入」
+    -
+      element_info:
+      find_type:
+      operate_type: sleep
+      times: 3
+      path: 等待登录结果返回
+    # ---------- 登录结果校验 ----------
+    -
+      element_info: com.subto.osqui:id/base_webview_wv
+      find_type: id
+      operate_type: check
+      path: 校验进入首页（MainActivity 的 H5 容器 base_webview_wv 存在，登录成功）

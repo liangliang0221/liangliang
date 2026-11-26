@@ -1,9 +1,16 @@
 # -*-coding: utf-8 -*-
-# @Time    : 2026/05/13
-# @Author  : liangliang
+# @Time    : 2023/11/22 15:30
+# @Author  : zhenhai
 # @File    : home.py
 # @Software: PyCharm
 import os
+import sys
+
+# 让脚本直接运行时也能找到 common 包（sys.path[0] 会变成 conftest/，需要补上项目根目录）
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from common.Operate import Operate
 
 PATH = lambda p: os.path.abspath(os.path.join(os.path.dirname(__file__), p))
